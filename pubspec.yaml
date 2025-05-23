@@ -1,0 +1,19 @@
+name: flexible_type_parser
+description: >-
+  A Dart utility package providing helper functions to flexibly parse JSON values 
+  that might have inconsistent data types (e.g., strings to numbers, strings/numbers to booleans).
+version: 0.1.8
+homepage: https://example.com/flexible_type_parser # Placeholder
+repository: https://github.com/your_username/flexible_type_parser # Placeholder
+
+environment:
+  sdk: '>=3.0.0 <4.0.0' # Adjusted to a common modern range, can be fine-tuned
+
+# Optional: Add dependencies if your helper functions needed them.
+# For now, these simple helpers have no external dependencies.
+# dependencies:
+#   path: ^1.8.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.21.0
