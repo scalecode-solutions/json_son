@@ -1,3 +1,7 @@
+## 0.1.10
+
+- Removed unused import.
+
 ## 0.1.9
 
 - Renamed package to Just Straightens Out Nonsense (JSON) and to keep it short, made it json_son.
