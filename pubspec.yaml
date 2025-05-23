@@ -3,8 +3,8 @@ description: >-
   A Dart utility package providing helper functions to flexibly parse JSON values 
   that might have inconsistent data types (e.g., strings to numbers, strings/numbers to booleans).
 version: 0.1.9
-homepage: https://github.com/sidphyve/json_son/blob/main/README.md
-repository: https://github.com/sidphyve/json_son
+homepage: https://github.com/scalecode-solutions/json_son/blob/main/README.md
+repository: https://github.com/scalecode-solutions/json_son
 
 environment:
   sdk: '>=3.0.0 <4.0.0' # Adjusted to a common modern range, can be fine-tuned

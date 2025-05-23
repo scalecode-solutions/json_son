@@ -140,8 +140,8 @@ Feel free to open an issue or submit a pull request if you have suggestions or f
 
 ## Additional information
 
-- **Source Code**: You can find the source code on https://github.com/sidphyve/json_son.
-- **Issue Tracker**: If you encounter any bugs or have feature requests, please file an issue on our https://github.com/sidphyve/json_son/issues.
+- **Source Code**: You can find the source code on https://github.com/scalecode-solutions/json_son.
+- **Issue Tracker**: If you encounter any bugs or have feature requests, please file an issue on our https://github.com/scalecode-solutions/json_son/issues.
 - **License**: This package is licensed under the MIT License. See the `LICENSE` file for more details.
 - **Contributions**: We welcome contributions! Please feel free to submit a pull request or open an issue. We generally respond to issues and pull requests within a few business days, but response times may vary.
 - **Further Information**: For more detailed information on specific functions and their behavior, please refer to the inline documentation within the source code.
