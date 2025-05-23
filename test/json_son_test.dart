@@ -1,4 +1,4 @@
-import 'package:flexible_type_parser/flexible_type_parser.dart';
+import 'package:json_son/json_son.dart';
 import 'package:test/test.dart';
 
 void main() {
