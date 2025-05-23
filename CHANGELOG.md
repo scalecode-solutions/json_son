@@ -1,3 +1,7 @@
+## 0.1.9
+
+- Renamed package to Just Straightens Out Nonsense (JSON) and to keep it short, made it json_son.
+
 ## 0.1.8
 
 - Added `flexibleUpperStringFromJson` for converting strings to uppercase after trimming.

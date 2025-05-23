@@ -11,7 +11,7 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/to/develop-packages). 
 -->
 
-# Flexible Type Parser
+# json_son (Just Straightens Out Nonsense)
 
 A Dart utility package providing helper functions to flexibly parse JSON values that might have inconsistent data types. This is especially useful when dealing with APIs that might send numbers as strings, booleans as strings/integers, dates in various formats, single items instead of lists, comma-separated string lists, or strings with leading/trailing whitespace.
 
@@ -35,7 +35,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flexible_type_parser: ^0.1.8 # Or the latest version
+  json_son: ^0.1.9 # Or the latest version
 ```
 
 Then, run `flutter pub get` or `dart pub get`.
@@ -45,7 +45,7 @@ Then, run `flutter pub get` or `dart pub get`.
 Import the library and use the helper functions in your DTOs:
 
 ```dart
-import 'package:flexible_type_parser/flexible_type_parser.dart';
+import 'package:json_son/json_son.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'my_model.freezed.dart';
@@ -140,8 +140,8 @@ Feel free to open an issue or submit a pull request if you have suggestions or f
 
 ## Additional information
 
-- **Source Code**: You can find the source code on [GitHub](https://github.com/your-username/flexible_type_parser). (Please replace `your-username` with the actual GitHub username or organization).
-- **Issue Tracker**: If you encounter any bugs or have feature requests, please file an issue on our [GitHub Issues page](https://github.com/your-username/flexible_type_parser/issues). (Please replace `your-username` with the actual GitHub username or organization).
+- **Source Code**: You can find the source code on https://github.com/sidphyve/json_son.
+- **Issue Tracker**: If you encounter any bugs or have feature requests, please file an issue on our https://github.com/sidphyve/json_son/issues.
 - **License**: This package is licensed under the MIT License. See the `LICENSE` file for more details.
 - **Contributions**: We welcome contributions! Please feel free to submit a pull request or open an issue. We generally respond to issues and pull requests within a few business days, but response times may vary.
 - **Further Information**: For more detailed information on specific functions and their behavior, please refer to the inline documentation within the source code.

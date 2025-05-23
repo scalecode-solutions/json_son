@@ -7,7 +7,7 @@
 /// by annotating DTO fields with `@JsonKey(fromJson: ...)`.
 library;
 
-export 'src/flexible_type_parser_base.dart';
+export 'src/json_son_base.dart';
 
 // TODO: Export any libraries intended for clients of this package.
 
