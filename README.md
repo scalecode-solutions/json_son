@@ -134,6 +134,17 @@ Make sure to run your build runner after adding these annotations:
 - `String? flexibleUpperStringFromJson(dynamic value)`
   - Converts input to string, trims it, then converts to uppercase. Returns `null` if the trimmed string is empty.
 
+- `Map<K, V>? flexibleMapFromJson<K, V>(dynamic value, MapEntry<K, V>? Function(dynamic key, dynamic value) mapper)`
+  - Transforms a map by applying a transformation function to each key-value pair.
+  - Handles `null` input by returning `null`.
+  - The `mapper` function can return `null` to skip entries.
+  - Example: Converts `{"a": "1", "b": "2"}` to `{"a": 1, "b": 2}` when used with `int.tryParse`.
+
+- `Map<K, V> flexibleMapNotNullFromJson<K, V>(dynamic value, MapEntry<K, V>? Function(dynamic key, dynamic value) mapper)`
+  - Similar to `flexibleMapFromJson` but returns an empty map instead of `null` for `null` input.
+  - The `mapper` function can return `null` to skip entries.
+  - Example: Converts `{"a": "1", "b": "x"}` to `{"a": 1}` when used with `int.tryParse`.
+
 ## Contributing
 
 Feel free to open an issue or submit a pull request if you have suggestions or find bugs.
