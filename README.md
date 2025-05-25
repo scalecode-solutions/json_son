@@ -35,7 +35,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  json_son: ^0.1.9 # Or the latest version
+  json_son: ^0.1.11 # Or the latest version
 ```
 
 Then, run `flutter pub get` or `dart pub get`.

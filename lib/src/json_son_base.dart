@@ -1,6 +1,4 @@
-// TODO: Put public facing types in this file.
-
-/// Parses a [dynamic] value into an [int]?. 
+/// Parses a [dynamic] value into an [int]?.
 /// Handles `null`, `int`, `double` (truncates), and `String` representations.
 /// An empty string or a string that fails to parse will result in `null`.
 int? flexibleIntFromJson(dynamic value) {
@@ -49,7 +47,7 @@ bool? flexibleBoolFromJson(dynamic value) {
 }
 
 /// Parses a [dynamic] value into a [String]?.
-/// Handles `null` and `String`. Converts other types (like `int`, `double`, `bool`) 
+/// Handles `null` and `String`. Converts other types (like `int`, `double`, `bool`)
 /// to their string representation using `.toString()`.
 String? flexibleStringFromJson(dynamic value) {
   if (value == null) return null;
@@ -77,7 +75,7 @@ num? flexibleNumFromJson(dynamic value) {
 /// If the value is an `int`, assumes it's milliseconds since epoch (UTC).
 /// If the value is a `String`:
 ///   - Tries direct parsing via `DateTime.tryParse` (for ISO 8601 and similar).
-///   - If direct parsing fails and the string is purely numeric, 
+///   - If direct parsing fails and the string is purely numeric,
 ///     treats it as milliseconds since epoch.
 /// An empty string or unparseable string format will result in `null`.
 DateTime? flexibleDateTimeFromJson(dynamic value) {
@@ -91,7 +89,7 @@ DateTime? flexibleDateTimeFromJson(dynamic value) {
     // Try standard ISO 8601 parsing first
     DateTime? dt = DateTime.tryParse(value);
     if (dt != null) return dt;
-    
+
     // If it's a purely numeric string, try parsing as milliseconds since epoch
     final intValue = int.tryParse(value);
     if (intValue != null) {
@@ -111,7 +109,7 @@ Uri? flexibleUriFromJson(dynamic value) {
     return Uri.tryParse(value);
   }
   // If the value is already a Uri, though less common from raw JSON
-  if (value is Uri) return value; 
+  if (value is Uri) return value;
   return null;
 }
 
@@ -121,22 +119,25 @@ Uri? flexibleUriFromJson(dynamic value) {
 
 /// Ensures result is always a List, even if API returns single item or null.
 /// Useful for APIs that inconsistently return arrays vs single items for a field.
-/// Returns `null` if the input `value` is null or if the `itemParser` 
+/// Returns `null` if the input `value` is null or if the `itemParser`
 /// results in `null` for a single item input.
 /// Filters out `null` items from the list if the input is a list.
-/// 
+///
 /// Example:
 /// ```dart
 /// @JsonKey(fromJson: (v) => flexibleListFromJson(v, flexibleIntFromJson))
 /// List<int?>? numbers;
 /// ```
 List<T?>? flexibleListFromJson<T>(
-  dynamic value, 
+  dynamic value,
   T? Function(dynamic) itemParser,
 ) {
   if (value == null) return null;
   if (value is List) {
-    return value.map((item) => itemParser(item)).where((parsedItem) => parsedItem != null).toList();
+    return value
+        .map((item) => itemParser(item))
+        .where((parsedItem) => parsedItem != null)
+        .toList();
   }
   // Single item? Wrap it in a list if the parsed item is not null.
   final T? parsedSingleItem = itemParser(value);
@@ -146,14 +147,14 @@ List<T?>? flexibleListFromJson<T>(
 /// For when APIs return empty arrays as null, or you want to guarantee a non-null list.
 /// Returns empty list instead of null if the input is null or if parsing results in nulls.
 /// Filters out `null` items from the list if the input is a list.
-/// 
+///
 /// Example:
 /// ```dart
 /// @JsonKey(fromJson: (v) => flexibleListNotNullFromJson(v, flexibleStringFromJson))
 /// List<String> tags; // Guarantees a List<String>, never null.
 /// ```
 List<T> flexibleListNotNullFromJson<T>(
-  dynamic value, 
+  dynamic value,
   T? Function(dynamic) itemParser,
 ) {
   if (value == null) return <T>[];
@@ -176,7 +177,7 @@ List<T> flexibleListNotNullFromJson<T>(
 /// Handles `null` input.
 /// If input is already a list, its elements are converted to strings.
 /// Trims whitespace from each part and filters out empty strings after splitting.
-/// 
+///
 /// Example:
 /// ```dart
 /// @JsonKey(fromJson: flexibleCommaSeparatedListFromJson)
@@ -185,7 +186,10 @@ List<T> flexibleListNotNullFromJson<T>(
 List<String>? flexibleCommaSeparatedListFromJson(dynamic value) {
   if (value == null) return null;
   if (value is List) {
-    return value.map((e) => e.toString().trim()).where((e) => e.isNotEmpty).toList();
+    return value
+        .map((e) => e.toString().trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
   }
   if (value is String) {
     if (value.trim().isEmpty) return null;
@@ -202,10 +206,10 @@ List<String>? flexibleCommaSeparatedListFromJson(dynamic value) {
 // STRING NORMALIZATION
 // ============================================================================
 
-/// Trims whitespace from the input string (if it's a string) and 
+/// Trims whitespace from the input string (if it's a string) and
 /// treats empty or whitespace-only strings as `null`.
 /// If the input is not a string but not null, it's converted via `.toString()` first.
-/// 
+///
 /// Example:
 /// ```dart
 /// @JsonKey(fromJson: flexibleTrimmedStringFromJson)
@@ -220,7 +224,7 @@ String? flexibleTrimmedStringFromJson(dynamic value) {
 
 /// Normalizes a string to lowercase after trimming and handling null/empty strings.
 /// Uses `flexibleTrimmedStringFromJson` internally.
-/// 
+///
 /// Example:
 /// ```dart
 /// @JsonKey(fromJson: flexibleLowerStringFromJson)
@@ -233,7 +237,7 @@ String? flexibleLowerStringFromJson(dynamic value) {
 
 /// Normalizes a string to uppercase after trimming and handling null/empty strings.
 /// Uses `flexibleTrimmedStringFromJson` internally.
-/// 
+///
 /// Example:
 /// ```dart
 /// @JsonKey(fromJson: flexibleUpperStringFromJson)

@@ -1,17 +1,15 @@
-/// A Dart utility package providing helper functions to flexibly parse JSON values 
-/// that might have inconsistent data types (e.g., strings to numbers, 
+/// A Dart utility package providing helper functions to flexibly parse JSON values
+/// that might have inconsistent data types (e.g., strings to numbers,
 /// strings/numbers to booleans, or dates in various formats).
-/// 
-/// These functions are designed to be used with JSON deserialization, often in 
+///
+/// These functions are designed to be used with JSON deserialization, often in
 /// conjunction with code generation libraries like `json_serializable` (used by `freezed`),
 /// by annotating DTO fields with `@JsonKey(fromJson: ...)`.
 library;
 
 export 'src/json_son_base.dart';
 
-// TODO: Export any libraries intended for clients of this package.
-
-/// Parses a [dynamic] value into an [int]?. 
+/// Parses a [dynamic] value into an [int]?.
 /// Handles `null`, `int`, `double` (truncates), and `String` representations.
 /// An empty string or a string that fails to parse will result in `null`.
 int? flexibleIntFromJson(dynamic value) {
@@ -60,7 +58,7 @@ bool? flexibleBoolFromJson(dynamic value) {
 }
 
 /// Parses a [dynamic] value into a [String]?.
-/// Handles `null` and `String`. Converts other types (like `int`, `double`, `bool`) 
+/// Handles `null` and `String`. Converts other types (like `int`, `double`, `bool`)
 /// to their string representation using `.toString()`.
 String? flexibleStringFromJson(dynamic value) {
   if (value == null) return null;
@@ -91,7 +89,7 @@ num? flexibleNumFromJson(dynamic value) {
 /// If the value is an `int`, assumes it's milliseconds since epoch (UTC).
 /// If the value is a `String`:
 ///   - Tries direct parsing via `DateTime.tryParse` (for ISO 8601 and similar).
-///   - If direct parsing fails and the string is purely numeric, 
+///   - If direct parsing fails and the string is purely numeric,
 ///     treats it as milliseconds since epoch.
 /// An empty string or unparseable string format will result in `null`.
 DateTime? flexibleDateTimeFromJson(dynamic value) {
@@ -105,7 +103,7 @@ DateTime? flexibleDateTimeFromJson(dynamic value) {
     // Try standard ISO 8601 parsing first
     DateTime? dt = DateTime.tryParse(value);
     if (dt != null) return dt;
-    
+
     // If it's a purely numeric string, try parsing as milliseconds since epoch
     final intValue = int.tryParse(value);
     if (intValue != null) {
@@ -125,6 +123,6 @@ Uri? flexibleUriFromJson(dynamic value) {
     return Uri.tryParse(value);
   }
   // If the value is already a Uri, though less common from raw JSON
-  if (value is Uri) return value; 
+  if (value is Uri) return value;
   return null;
 }

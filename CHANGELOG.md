@@ -1,3 +1,10 @@
+## 0.1.11
+
+- Ran dart format on the codebase
+- Code formatting and documentation improvements across the codebase
+- Removed unnecessary TODOs and improved code comments
+- Enhanced code style consistency in method parameters and documentation
+
 ## 0.1.10
 
 - Removed unused import.
