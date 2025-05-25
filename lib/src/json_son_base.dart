@@ -244,6 +244,60 @@ String? flexibleLowerStringFromJson(dynamic value) {
 /// String? productCode; // Input "  abc-123  " -> "ABC-123"
 /// ```
 String? flexibleUpperStringFromJson(dynamic value) {
-  final str = flexibleTrimmedStringFromJson(value);
-  return str?.toUpperCase();
+  return flexibleTrimmedStringFromJson(value)?.toUpperCase();
+}
+
+/// Transforms a map by applying a transformation function to each key-value pair.
+/// Handles `null` input by returning `null`.
+/// The [mapper] function can return `null` to skip entries.
+///
+/// Example:
+/// ```dart
+/// @JsonKey(fromJson: (v) => flexibleMapFromJson(v, (k, v) =>
+///   k != null ? MapEntry(k, int.tryParse(v)) : null))
+/// Map<String, int>? counts; // Input {"a": "1", "b": "2"} -> {"a": 1, "b": 2}
+/// ```
+Map<K, V>? flexibleMapFromJson<K, V>(
+  dynamic value,
+  MapEntry<K, V>? Function(dynamic key, dynamic value) mapper,
+) {
+  if (value == null) return null;
+
+  final result = <K, V>{};
+  if (value is Map) {
+    value.forEach((key, value) {
+      final entry = mapper(key, value);
+      if (entry != null) {
+        result[entry.key] = entry.value;
+      }
+    });
+  }
+  return result;
+}
+
+/// Similar to [flexibleMapFromJson] but returns an empty map instead of `null` for `null` input.
+/// The [mapper] function can return `null` to skip entries.
+///
+/// Example:
+/// ```dart
+/// @JsonKey(fromJson: (v) => flexibleMapNotNullFromJson(v, (k, v) =>
+///   k != null ? MapEntry(k, int.tryParse(v)) : null))
+/// Map<String, int> counts; // Input {"a": "1", "b": "x"} -> {"a": 1}
+/// ```
+Map<K, V> flexibleMapNotNullFromJson<K, V>(
+  dynamic value,
+  MapEntry<K, V>? Function(dynamic key, dynamic value) mapper,
+) {
+  if (value == null) return <K, V>{};
+
+  final result = <K, V>{};
+  if (value is Map) {
+    value.forEach((key, value) {
+      final entry = mapper(key, value);
+      if (entry != null) {
+        result[entry.key] = entry.value;
+      }
+    });
+  }
+  return result;
 }

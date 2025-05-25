@@ -1,3 +1,48 @@
+## 0.1.22
+
+- Added `flexibleMapFromJson` and `flexibleMapNotNullFromJson` functions for flexible map transformations
+
+## 0.1.21
+
+- Added comprehensive tests for `flexibleListFromJson` and `flexibleListNotNullFromJson`
+
+## 0.1.20
+
+- Added comprehensive tests for `flexibleLowerStringFromJson` and `flexibleUpperStringFromJson`
+
+## 0.1.19
+
+- Added comprehensive tests for `flexibleTrimmedStringFromJson`
+
+## 0.1.18
+
+- Added comprehensive tests for `flexibleUriFromJson`
+- Fixed test expectations for `flexibleUriFromJson` to match actual behavior
+
+## 0.1.17
+
+- Added comprehensive tests for `flexibleDateTimeFromJson`
+
+## 0.1.16
+
+- Added comprehensive tests for `flexibleNumFromJson`
+
+## 0.1.15
+
+- Added comprehensive tests for `flexibleStringFromJson`
+
+## 0.1.14
+
+- Added comprehensive tests for `flexibleBoolFromJson`
+
+## 0.1.13
+
+- Added comprehensive tests for `flexibleDoubleFromJson`
+
+## 0.1.12
+
+- Added comprehensive tests for `flexibleIntFromJson`
+
 ## 0.1.11
 
 - Ran dart format on the codebase

@@ -9,6 +9,9 @@ library;
 
 export 'src/json_son_base.dart';
 
+export 'src/json_son_base.dart'
+    show flexibleMapFromJson, flexibleMapNotNullFromJson;
+
 /// Parses a [dynamic] value into an [int]?.
 /// Handles `null`, `int`, `double` (truncates), and `String` representations.
 /// An empty string or a string that fails to parse will result in `null`.
