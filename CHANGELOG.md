@@ -1,3 +1,51 @@
+## 0.3.3
+
+- Fixed documentation comments to properly escape angle brackets in type references
+
+## 0.3.2
+
+### Enhanced JsonSon Class
+- Added error tracking with detailed path information for debugging and validation
+- Implemented advanced constructors for different data sources:
+  - `fromApiResponse`: Handle API responses that might be strings or maps
+  - `fromMapSafe`: Safely create JsonSon instances with error handling
+- Added batch operations for processing multiple keys or paths at once
+- Implemented fallback keys to try multiple keys in sequence until a value is found
+- Added transformation methods for mapping and merging JSON data
+- Implemented validation methods for checking required keys and paths
+
+### Extensions
+- Created `JsonSonMapExtension` for direct access to JsonSon methods from Map objects
+- Developed `JsonSonApiExtension` for common API patterns including:
+  - Pagination information extraction
+  - Error handling with code and message extraction
+  - User information normalization
+  - Timestamp handling
+
+### Validation Framework
+- Implemented `JsonSonValidator` with a fluent API for complex validation logic
+- Added type validation for strings, integers, booleans, etc.
+- Added format validation for emails, URLs, and custom patterns
+- Implemented range validation for numeric values and string lengths
+- Added support for custom validation rules
+- Added nested validation for objects and array items
+
+### Testing
+- Added comprehensive test suite for all new features
+- Created tests for extensions and the validation framework
+- Ensured all tests pass with proper error handling
+
+### Documentation
+- Updated README with detailed examples and API documentation
+- Added code examples for all new features
+- Provided comprehensive API reference for all classes
+
+## 0.2.0
+
+- Added new class-based API with `JsonSon` class for more fluent and powerful JSON handling
+- Added comprehensive example for the class-based approach
+- Maintained full backward compatibility with the functional approach
+
 ## 0.1.22
 
 - Added `flexibleMapFromJson` and `flexibleMapNotNullFromJson` functions for flexible map transformations
