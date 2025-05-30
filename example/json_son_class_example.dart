@@ -17,16 +17,8 @@ void main() {
       'lastUpdated': 1698316200000
     },
     'variants': [
-      {
-        'id': '101',
-        'color': 'Red',
-        'inStock': 1
-      },
-      {
-        'id': '102',
-        'color': 'Blue',
-        'inStock': 0
-      }
+      {'id': '101', 'color': 'Red', 'inStock': 1},
+      {'id': '102', 'color': 'Blue', 'inStock': 0}
     ]
   };
 
@@ -39,34 +31,36 @@ void main() {
   print('Price: ${json.getDouble('price')}');
   print('Is Active: ${json.getBool('isActive')}');
   print('Created At: ${json.getDateTime('created_at')}');
-  
+
   // Using default values
   print('\n=== Default Values ===');
-  print('Metadata (with default): ${json.getStringOrDefault('metadata', 'No metadata available')}');
+  print(
+      'Metadata (with default): ${json.getStringOrDefault('metadata', 'No metadata available')}');
   print('Discount (with default): ${json.getDoubleOrDefault('discount', 0.0)}');
-  
+
   // Working with lists
   print('\n=== Lists ===');
   final ratings = json.getList<num>('ratings', flexibleNumFromJson);
   print('Ratings: $ratings');
-  
+
   final tags = json.getCommaSeparatedList('tags');
   print('Tags: $tags');
-  
+
   // Nested objects
   print('\n=== Nested Objects ===');
   final stock = json.getObject('stock');
   if (stock != null) {
     print('Stock Count: ${stock.getInt('count')}');
-    print('Stock Locations: ${stock.getList<String>('locations', flexibleStringFromJson)}');
+    print(
+        'Stock Locations: ${stock.getList<String>('locations', flexibleStringFromJson)}');
     print('Last Updated: ${stock.getDateTime('lastUpdated')}');
   }
-  
+
   // Path-based access
   print('\n=== Path-Based Access ===');
   print('Stock Count (path): ${json.getIntPath('stock.count')}');
   print('First Location (path): ${json.getStringPath('stock.locations.0')}');
-  
+
   // Working with arrays of objects
   print('\n=== Arrays of Objects ===');
   final variants = json.getObjectList('variants');
@@ -79,21 +73,21 @@ void main() {
       print('  In Stock: ${variant.getBool('inStock')}');
     }
   }
-  
+
   // Utility methods
   print('\n=== Utility Methods ===');
   print('Has "price" key: ${json.hasKey('price')}');
   print('Has "discount" key: ${json.hasKey('discount')}');
   print('All keys: ${json.keys}');
-  
+
   // Creating a subset of the data
   print('\n=== Data Filtering ===');
   final basicInfo = json.select(['id', 'name', 'price']);
   print('Basic Info: ${basicInfo.rawData}');
-  
+
   final withoutStock = json.exclude(['stock', 'variants']);
   print('Without Stock Info: ${withoutStock.rawData}');
-  
+
   // Map transformation
   print('\n=== Map Transformation ===');
   final stringMap = json.mapValuesOrEmpty<String, String>((key, value) {
@@ -104,14 +98,15 @@ void main() {
     return MapEntry(key, ''); // Provide a default empty string
   });
   print('All values as strings: $stringMap');
-  
+
   // Comparison with functional approach
   print('\n=== Comparison with Functional Approach ===');
   print('Class-based: ${json.getIntPath('stock.count')}');
   print('Functional: ${flexibleIntFromJson(jsonData['stock']?['count'])}');
-  
-  print('Class-based: ${json.getObjectList('variants')?.first.getString('color')}');
-  
+
+  print(
+      'Class-based: ${json.getObjectList('variants')?.first.getString('color')}');
+
   // Functional equivalent requires more verbose code:
   String? firstVariantColor;
   final variantData = jsonData['variants'];

@@ -8,7 +8,7 @@
 ///
 /// This package also provides a class-based API through the `JsonSon` class,
 /// which offers a more fluent interface for working with inconsistent JSON data.
-/// 
+///
 /// The enhanced version includes:
 /// - Error tracking and validation
 /// - Advanced path-based access

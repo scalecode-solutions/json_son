@@ -286,17 +286,20 @@ void main() {
 
     group('flexibleListFromJson', () {
       test('handles list of strings', () {
-        final result = flexibleListFromJson(['a', 'b', 'c'], (e) => e as String);
+        final result =
+            flexibleListFromJson(['a', 'b', 'c'], (e) => e as String);
         expect(result, equals(['a', 'b', 'c']));
       });
 
       test('handles list of parsed values', () {
-        final result = flexibleListFromJson(['1', '2', '3'], (e) => int.tryParse(e));
+        final result =
+            flexibleListFromJson(['1', '2', '3'], (e) => int.tryParse(e));
         expect(result, equals([1, 2, 3]));
       });
 
       test('filters out null values', () {
-        final result = flexibleListFromJson(['1', 'a', '3'], (e) => int.tryParse(e));
+        final result =
+            flexibleListFromJson(['1', 'a', '3'], (e) => int.tryParse(e));
         expect(result, equals([1, 3]));
       });
 
@@ -323,9 +326,7 @@ void main() {
 
       test('returns empty list when all items parse to null', () {
         final result = flexibleListNotNullFromJson(
-          ['a', 'b'], 
-          (e) => e == 'a' ? null : null
-        );
+            ['a', 'b'], (e) => e == 'a' ? null : null);
         expect(result, isEmpty);
       });
 

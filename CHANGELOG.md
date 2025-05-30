@@ -1,3 +1,7 @@
+## 0.3.4
+
+- Ran dart format on the codebase
+
 ## 0.3.3
 
 - Fixed documentation comments to properly escape angle brackets in type references
