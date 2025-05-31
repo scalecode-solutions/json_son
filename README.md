@@ -66,7 +66,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  json_son: ^0.3.4 # Or the latest version
+  json_son: ^0.3.7 # Or the latest version
 ```
 
 Then, run `flutter pub get` or `dart pub get`.
@@ -511,6 +511,31 @@ class TimestampInfo {
   - Parses each item in the list using the provided `itemParser`.
   - Filters out items that parse to `null`.
   - Returns an empty list if the input is `null` or if all items parse to `null`.
+
+- `int flexibleRequiredIntFromJson(dynamic value)`
+  - Non-nullable version of `flexibleIntFromJson`.
+  - Returns `0` instead of `null` when the input is `null` or cannot be parsed as an integer.
+  - Useful when you need to guarantee a non-null integer value.
+
+- `double flexibleRequiredDoubleFromJson(dynamic value)`
+  - Non-nullable version of `flexibleDoubleFromJson`.
+  - Returns `0.0` instead of `null` when the input is `null` or cannot be parsed as a double.
+  - Useful when you need to guarantee a non-null double value.
+
+- `String flexibleRequiredStringFromJson(dynamic value)`
+  - Non-nullable version of `flexibleStringFromJson`.
+  - Returns an empty string (`""`) instead of `null` when the input is `null`.
+  - Useful when you need to guarantee a non-null string value.
+
+- `bool flexibleRequiredBoolFromJson(dynamic value)`
+  - Non-nullable version of `flexibleBoolFromJson`.
+  - Returns `false` instead of `null` when the input is `null` or cannot be parsed as a boolean.
+  - Useful when you need to guarantee a non-null boolean value.
+
+- `List<T> flexibleRequiredListFromJson<T>(dynamic value, T? Function(dynamic) itemParser)`
+  - Alias for `flexibleListNotNullFromJson` to provide a consistent naming convention.
+  - Returns an empty list if the input is `null` or if all items parse to `null`.
+  - Useful when you need to guarantee a non-null list.
 
 - `List<String>? flexibleCommaSeparatedListFromJson(dynamic value)`
   - Parses comma-separated strings (e.g., "apple, banana, cherry") into `List<String>?`.

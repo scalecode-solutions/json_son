@@ -23,7 +23,14 @@ export 'src/json_son_extensions.dart';
 export 'src/json_son_validator.dart';
 
 export 'src/json_son_base.dart'
-    show flexibleMapFromJson, flexibleMapNotNullFromJson;
+    show
+        flexibleMapFromJson,
+        flexibleMapNotNullFromJson,
+        flexibleRequiredIntFromJson,
+        flexibleRequiredDoubleFromJson,
+        flexibleRequiredStringFromJson,
+        flexibleRequiredBoolFromJson,
+        flexibleRequiredListFromJson;
 
 /// Parses a [dynamic] value into an [int]?.
 /// Handles `null`, `int`, `double` (truncates), and `String` representations.

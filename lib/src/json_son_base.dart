@@ -12,6 +12,13 @@ int? flexibleIntFromJson(dynamic value) {
   return null; // Fallback for other unexpected types
 }
 
+/// Parses a [dynamic] value into a non-nullable [int].
+/// Similar to [flexibleIntFromJson], but returns 0 instead of null.
+/// Useful when you need to guarantee a non-null int value.
+int flexibleRequiredIntFromJson(dynamic value) {
+  return flexibleIntFromJson(value) ?? 0;
+}
+
 /// Parses a [dynamic] value into a [double]?.
 /// Handles `null`, `double`, `int`, and `String` representations.
 /// An empty string or a string that fails to parse will result in `null`.
@@ -24,6 +31,13 @@ double? flexibleDoubleFromJson(dynamic value) {
     return double.tryParse(value); // Returns null if parsing fails
   }
   return null; // Fallback for other unexpected types
+}
+
+/// Parses a [dynamic] value into a non-nullable [double].
+/// Similar to [flexibleDoubleFromJson], but returns 0.0 instead of null.
+/// Useful when you need to guarantee a non-null double value.
+double flexibleRequiredDoubleFromJson(dynamic value) {
+  return flexibleDoubleFromJson(value) ?? 0.0;
 }
 
 /// Parses a [dynamic] value into a [bool]?.
@@ -46,6 +60,13 @@ bool? flexibleBoolFromJson(dynamic value) {
   return null; // Fallback for other unexpected types or unhandled values
 }
 
+/// Parses a [dynamic] value into a non-nullable [bool].
+/// Similar to [flexibleBoolFromJson], but returns false instead of null.
+/// Useful when you need to guarantee a non-null boolean value.
+bool flexibleRequiredBoolFromJson(dynamic value) {
+  return flexibleBoolFromJson(value) ?? false;
+}
+
 /// Parses a [dynamic] value into a [String]?.
 /// Handles `null` and `String`. Converts other types (like `int`, `double`, `bool`)
 /// to their string representation using `.toString()`.
@@ -55,6 +76,13 @@ String? flexibleStringFromJson(dynamic value) {
     return value;
   }
   return value.toString();
+}
+
+/// Parses a [dynamic] value into a non-nullable [String].
+/// Similar to [flexibleStringFromJson], but returns an empty string instead of null.
+/// Useful when you need to guarantee a non-null string value.
+String flexibleRequiredStringFromJson(dynamic value) {
+  return flexibleStringFromJson(value) ?? '';
 }
 
 /// Parses a [dynamic] value into a [num]? (int or double).
@@ -171,6 +199,22 @@ List<T> flexibleListNotNullFromJson<T>(
   // Single item? Wrap it in a list if the parsed item is not null.
   final T? parsedSingleItem = itemParser(value);
   return parsedSingleItem != null ? [parsedSingleItem] : <T>[];
+}
+
+/// Alias for [flexibleListNotNullFromJson] to provide a consistent naming convention
+/// with other required functions.
+/// Returns an empty list if the input is null or if parsing results in all nulls.
+///
+/// Example:
+/// ```dart
+/// @JsonKey(fromJson: (v) => flexibleRequiredListFromJson(v, flexibleIntFromJson))
+/// List<int> scores; // Guarantees a List<int>, never null.
+/// ```
+List<T> flexibleRequiredListFromJson<T>(
+  dynamic value,
+  T? Function(dynamic) itemParser,
+) {
+  return flexibleListNotNullFromJson<T>(value, itemParser);
 }
 
 /// Parses comma-separated strings into a list of strings.

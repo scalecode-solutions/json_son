@@ -1,3 +1,20 @@
+## 0.3.7
+
+- Added comprehensive tests for all new features
+
+## 0.3.6
+
+- Added non-nullable versions of flexible functions that return default values instead of null:
+- `flexibleRequiredBoolFromJson`: Returns false if null
+- `flexibleRequiredListFromJson`: Returns empty list if null (alias for flexibleListNotNullFromJson)
+
+## 0.3.5
+
+- Added non-nullable versions of flexible functions that return default values instead of null:
+  - `flexibleRequiredIntFromJson`: Returns 0 if null
+  - `flexibleRequiredDoubleFromJson`: Returns 0.0 if null
+  - `flexibleRequiredStringFromJson`: Returns empty string if null
+
 ## 0.3.4
 
 - Ran dart format on the codebase
