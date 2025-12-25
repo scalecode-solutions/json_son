@@ -138,7 +138,7 @@ class JsonSon {
 
   // Lists
   /// Gets a [List] of values for the given [key], applying the [converter] to each item.
-  List<T?>? getList<T>(String key, T? Function(dynamic) converter) =>
+  List<T>? getList<T>(String key, T? Function(dynamic) converter) =>
       flexibleListFromJson<T>(_data[key], converter);
 
   /// Gets a non-null [List] of values for the given [key], applying the [converter] to each item.
@@ -151,16 +151,12 @@ class JsonSon {
 
   /// Gets a [List] of [JsonSon] objects for the given [key].
   List<JsonSon>? getObjectList(String key) {
-    final list = getList<JsonSon>(key, (item) {
+    return getList<JsonSon>(key, (item) {
       if (item is Map<String, dynamic>) {
         return JsonSon(item);
       }
       return null;
     });
-
-    // Convert List<JsonSon?>? to List<JsonSon>?
-    if (list == null) return null;
-    return list.whereType<JsonSon>().toList();
   }
 
   // Path-based access (dot notation)

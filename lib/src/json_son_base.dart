@@ -167,18 +167,22 @@ Uri? flexibleUriFromJson(dynamic value) {
 /// Example:
 /// ```dart
 /// @JsonKey(fromJson: (v) => flexibleListFromJson(v, flexibleIntFromJson))
-/// List<int?>? numbers;
+/// List<int>? numbers;
 /// ```
-List<T?>? flexibleListFromJson<T>(
+List<T>? flexibleListFromJson<T>(
   dynamic value,
   T? Function(dynamic) itemParser,
 ) {
   if (value == null) return null;
   if (value is List) {
-    return value
-        .map((item) => itemParser(item))
-        .where((parsedItem) => parsedItem != null)
-        .toList();
+    final List<T> result = [];
+    for (final item in value) {
+      final parsedItem = itemParser(item);
+      if (parsedItem != null) {
+        result.add(parsedItem);
+      }
+    }
+    return result;
   }
   // Single item? Wrap it in a list if the parsed item is not null.
   final T? parsedSingleItem = itemParser(value);
