@@ -86,6 +86,26 @@ class JsonSon {
   /// Gets a [Uri] value for the given [key], handling type conversion.
   Uri? getUri(String key) => flexibleUriFromJson(_data[key]);
 
+  /// Gets a [Duration] value for the given [key], handling type conversion.
+  Duration? getDuration(String key) => flexibleDurationFromJson(_data[key]);
+
+  /// Gets a [BigInt] value for the given [key], handling type conversion.
+  BigInt? getBigInt(String key) => flexibleBigIntFromJson(_data[key]);
+
+  /// Gets a [CurrencyValue] for the given [key], handling type conversion.
+  CurrencyValue? getCurrency(String key) =>
+      flexibleCurrencyFromJson(_data[key]);
+
+  /// Gets an enum value for the given [key], handling type conversion.
+  T? getEnum<T extends Enum>(String key, List<T> values, {T? fallback}) =>
+      flexibleEnumFromJson(_data[key], values, fallback: fallback);
+
+  /// Gets a normalized phone number for the given [key].
+  String? getPhone(String key) => flexiblePhoneFromJson(_data[key]);
+
+  /// Gets a URL-safe slug for the given [key].
+  String? getSlug(String key) => flexibleSlugFromJson(_data[key]);
+
   // With default values
   /// Gets an [int] value for the given [key], or returns [defaultValue] if null.
   int getIntOrDefault(String key, int defaultValue) =>
@@ -270,6 +290,25 @@ class JsonSon {
     return null;
   }
 
+  /// Gets a [Duration] value at the given [path] using dot notation.
+  Duration? getDurationPath(String path) =>
+      flexibleDurationFromJson(getPath(path));
+
+  /// Gets a [BigInt] value at the given [path] using dot notation.
+  BigInt? getBigIntPath(String path) => flexibleBigIntFromJson(getPath(path));
+
+  /// Gets a [List] of values at the given [path], applying the [converter] to each item.
+  List<T>? getListPath<T>(String path, T? Function(dynamic) converter) {
+    final value = getPath(path);
+    return flexibleListFromJson<T>(value, converter);
+  }
+
+  /// Gets a non-null [List] of values at the given [path], applying the [converter] to each item.
+  List<T> getListPathOrEmpty<T>(String path, T? Function(dynamic) converter) {
+    final value = getPath(path);
+    return flexibleListNotNullFromJson<T>(value, converter);
+  }
+
   // With default values for path-based access
   /// Gets an [int] value at the given [path], or returns [defaultValue] if null.
   int getIntPathOrDefault(String path, int defaultValue) =>
@@ -430,6 +469,201 @@ class JsonSon {
     final merged = Map<String, dynamic>.from(_data);
     merged.addAll(other._data);
     return JsonSon(merged);
+  }
+
+  /// Deep merge with another JsonSon (recursively merges nested objects)
+  JsonSon deepMerge(JsonSon other) {
+    return JsonSon(_deepMergeMap(_data, other._data));
+  }
+
+  static Map<String, dynamic> _deepMergeMap(
+    Map<String, dynamic> base,
+    Map<String, dynamic> override,
+  ) {
+    final result = Map<String, dynamic>.from(base);
+    for (final entry in override.entries) {
+      if (result.containsKey(entry.key) &&
+          result[entry.key] is Map<String, dynamic> &&
+          entry.value is Map<String, dynamic>) {
+        result[entry.key] = _deepMergeMap(
+          result[entry.key] as Map<String, dynamic>,
+          entry.value as Map<String, dynamic>,
+        );
+      } else {
+        result[entry.key] = entry.value;
+      }
+    }
+    return result;
+  }
+
+  /// Compare with another JsonSon and return the differences
+  /// Returns a map with keys: 'added', 'removed', 'changed'
+  Map<String, dynamic> diff(JsonSon other) {
+    final added = <String, dynamic>{};
+    final removed = <String, dynamic>{};
+    final changed = <String, Map<String, dynamic>>{};
+
+    // Find added and changed keys
+    for (final entry in other._data.entries) {
+      if (!_data.containsKey(entry.key)) {
+        added[entry.key] = entry.value;
+      } else if (_data[entry.key] != entry.value) {
+        changed[entry.key] = {
+          'from': _data[entry.key],
+          'to': entry.value,
+        };
+      }
+    }
+
+    // Find removed keys
+    for (final entry in _data.entries) {
+      if (!other._data.containsKey(entry.key)) {
+        removed[entry.key] = entry.value;
+      }
+    }
+
+    return {
+      'added': added,
+      'removed': removed,
+      'changed': changed,
+    };
+  }
+
+  /// Pick values at nested paths (like select but supports dot notation)
+  JsonSon pick(List<String> paths) {
+    final result = <String, dynamic>{};
+    for (final path in paths) {
+      final value = getPath(path);
+      if (value != null) {
+        _setNestedValue(result, path.split('.'), value);
+      }
+    }
+    return JsonSon(result);
+  }
+
+  static void _setNestedValue(
+    Map<String, dynamic> map,
+    List<String> keys,
+    dynamic value,
+  ) {
+    if (keys.isEmpty) return;
+    if (keys.length == 1) {
+      map[keys.first] = value;
+      return;
+    }
+    final key = keys.first;
+    map[key] ??= <String, dynamic>{};
+    if (map[key] is Map<String, dynamic>) {
+      _setNestedValue(map[key] as Map<String, dynamic>, keys.sublist(1), value);
+    }
+  }
+
+  /// Flatten nested objects to dot-notation keys
+  /// Example: {'a': {'b': 1}} -> {'a.b': 1}
+  Map<String, dynamic> flatten({String separator = '.'}) {
+    final result = <String, dynamic>{};
+    _flattenMap(_data, '', separator, result);
+    return result;
+  }
+
+  static void _flattenMap(
+    Map<String, dynamic> map,
+    String prefix,
+    String separator,
+    Map<String, dynamic> result,
+  ) {
+    for (final entry in map.entries) {
+      final key = prefix.isEmpty ? entry.key : '$prefix$separator${entry.key}';
+      if (entry.value is Map<String, dynamic>) {
+        _flattenMap(
+            entry.value as Map<String, dynamic>, key, separator, result);
+      } else if (entry.value is List) {
+        for (int i = 0; i < (entry.value as List).length; i++) {
+          final item = (entry.value as List)[i];
+          if (item is Map<String, dynamic>) {
+            _flattenMap(item, '$key$separator$i', separator, result);
+          } else {
+            result['$key$separator$i'] = item;
+          }
+        }
+      } else {
+        result[key] = entry.value;
+      }
+    }
+  }
+
+  /// Unflatten dot-notation keys to nested objects
+  /// Example: {'a.b': 1} -> {'a': {'b': 1}}
+  static JsonSon unflatten(Map<String, dynamic> flatMap,
+      {String separator = '.'}) {
+    final result = <String, dynamic>{};
+    for (final entry in flatMap.entries) {
+      final keys = entry.key.split(separator);
+      _setNestedValue(result, keys, entry.value);
+    }
+    return JsonSon(result);
+  }
+
+  /// Get a value only if a condition is met
+  T? getIf<T>(String key, T? Function(String) getter,
+      bool Function(dynamic) condition) {
+    final rawValue = _data[key];
+    if (rawValue != null && condition(rawValue)) {
+      return getter(key);
+    }
+    return null;
+  }
+
+  /// Get an int only if it meets a condition
+  int? getIntIf(String key, bool Function(int) condition) {
+    final value = getInt(key);
+    return value != null && condition(value) ? value : null;
+  }
+
+  /// Get a string only if it meets a condition
+  String? getStringIf(String key, bool Function(String) condition) {
+    final value = getString(key);
+    return value != null && condition(value) ? value : null;
+  }
+
+  /// Convert to URL query string
+  /// Example: {'a': 1, 'b': 'hello'} -> 'a=1&b=hello'
+  String toQueryString({bool encode = true}) {
+    final params = <String>[];
+    _flattenForQuery(_data, '', params, encode);
+    return params.join('&');
+  }
+
+  static void _flattenForQuery(
+    Map<String, dynamic> map,
+    String prefix,
+    List<String> params,
+    bool encode,
+  ) {
+    for (final entry in map.entries) {
+      final key = prefix.isEmpty ? entry.key : '$prefix[${entry.key}]';
+      if (entry.value is Map<String, dynamic>) {
+        _flattenForQuery(
+            entry.value as Map<String, dynamic>, key, params, encode);
+      } else if (entry.value is List) {
+        for (int i = 0; i < (entry.value as List).length; i++) {
+          final item = (entry.value as List)[i];
+          final arrayKey = '$key[$i]';
+          if (item is Map<String, dynamic>) {
+            _flattenForQuery(item, arrayKey, params, encode);
+          } else {
+            final value =
+                encode ? Uri.encodeComponent(item.toString()) : item.toString();
+            params.add('$arrayKey=$value');
+          }
+        }
+      } else if (entry.value != null) {
+        final value = encode
+            ? Uri.encodeComponent(entry.value.toString())
+            : entry.value.toString();
+        params.add('$key=$value');
+      }
+    }
   }
 
   // Utility methods

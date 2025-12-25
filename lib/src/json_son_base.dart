@@ -1,3 +1,7 @@
+// ============================================================================
+// BASIC TYPE PARSING
+// ============================================================================
+
 /// Parses a [dynamic] value into an [int]?.
 /// Handles `null`, `int`, `double` (truncates), and `String` representations.
 /// An empty string or a string that fails to parse will result in `null`.
@@ -361,4 +365,391 @@ Map<K, V> flexibleMapNotNullFromJson<K, V>(
     });
   }
   return result;
+}
+
+// ============================================================================
+// ENUM PARSING
+// ============================================================================
+
+/// Parses a [dynamic] value into an enum value of type [T].
+/// Handles `null`, `String` (case-insensitive name matching), and `int` (index).
+/// Returns [fallback] if parsing fails or value is null.
+///
+/// Example:
+/// ```dart
+/// enum Status { pending, active, completed }
+///
+/// @JsonKey(fromJson: (v) => flexibleEnumFromJson(v, Status.values))
+/// Status status;
+/// ```
+T? flexibleEnumFromJson<T extends Enum>(
+  dynamic value,
+  List<T> values, {
+  T? fallback,
+}) {
+  if (value == null) return fallback;
+
+  if (value is String) {
+    if (value.isEmpty) return fallback;
+    final lowerValue = value.toLowerCase();
+    for (final enumValue in values) {
+      if (enumValue.name.toLowerCase() == lowerValue) {
+        return enumValue;
+      }
+    }
+    return fallback;
+  }
+
+  if (value is int) {
+    if (value >= 0 && value < values.length) {
+      return values[value];
+    }
+    return fallback;
+  }
+
+  return fallback;
+}
+
+/// Parses a [dynamic] value into a non-nullable enum value.
+/// Returns [fallback] if parsing fails.
+///
+/// Example:
+/// ```dart
+/// enum Status { pending, active, completed }
+///
+/// @JsonKey(fromJson: (v) => flexibleRequiredEnumFromJson(v, Status.values, Status.pending))
+/// Status status;
+/// ```
+T flexibleRequiredEnumFromJson<T extends Enum>(
+  dynamic value,
+  List<T> values,
+  T fallback,
+) {
+  return flexibleEnumFromJson(value, values, fallback: fallback) ?? fallback;
+}
+
+// ============================================================================
+// BIGINT PARSING
+// ============================================================================
+
+/// Parses a [dynamic] value into a [BigInt]?.
+/// Handles `null`, `int`, `String`, and `BigInt` representations.
+/// Useful for handling large integers that overflow int64.
+///
+/// Example:
+/// ```dart
+/// @JsonKey(fromJson: flexibleBigIntFromJson)
+/// BigInt? largeNumber;
+/// ```
+BigInt? flexibleBigIntFromJson(dynamic value) {
+  if (value == null) return null;
+  if (value is BigInt) return value;
+  if (value is int) return BigInt.from(value);
+  if (value is String) {
+    if (value.isEmpty) return null;
+    return BigInt.tryParse(value);
+  }
+  return null;
+}
+
+/// Parses a [dynamic] value into a non-nullable [BigInt].
+/// Returns [BigInt.zero] if parsing fails.
+BigInt flexibleRequiredBigIntFromJson(dynamic value) {
+  return flexibleBigIntFromJson(value) ?? BigInt.zero;
+}
+
+// ============================================================================
+// DURATION PARSING
+// ============================================================================
+
+/// Parses a [dynamic] value into a [Duration]?.
+/// Handles:
+/// - `null` -> null
+/// - `int` -> milliseconds
+/// - `String` in ISO 8601 format (e.g., "PT1H30M", "P1D")
+/// - `String` in human format (e.g., "1h 30m", "2d 5h", "90s")
+/// - `Map` with keys like "hours", "minutes", "seconds", "milliseconds"
+///
+/// Example:
+/// ```dart
+/// @JsonKey(fromJson: flexibleDurationFromJson)
+/// Duration? timeout;
+/// ```
+Duration? flexibleDurationFromJson(dynamic value) {
+  if (value == null) return null;
+
+  if (value is int) {
+    return Duration(milliseconds: value);
+  }
+
+  if (value is Duration) return value;
+
+  if (value is Map) {
+    final days = flexibleIntFromJson(value['days']) ??
+        flexibleIntFromJson(value['d']) ??
+        0;
+    final hours = flexibleIntFromJson(value['hours']) ??
+        flexibleIntFromJson(value['h']) ??
+        0;
+    final minutes = flexibleIntFromJson(value['minutes']) ??
+        flexibleIntFromJson(value['m']) ??
+        0;
+    final seconds = flexibleIntFromJson(value['seconds']) ??
+        flexibleIntFromJson(value['s']) ??
+        0;
+    final milliseconds = flexibleIntFromJson(value['milliseconds']) ??
+        flexibleIntFromJson(value['ms']) ??
+        0;
+    return Duration(
+      days: days,
+      hours: hours,
+      minutes: minutes,
+      seconds: seconds,
+      milliseconds: milliseconds,
+    );
+  }
+
+  if (value is String) {
+    if (value.isEmpty) return null;
+
+    // Try ISO 8601 duration format (PT1H30M, P1DT2H, etc.)
+    final iso8601 = _parseIso8601Duration(value);
+    if (iso8601 != null) return iso8601;
+
+    // Try human-readable format (1h 30m, 2d 5h, 90s, etc.)
+    final human = _parseHumanDuration(value);
+    if (human != null) return human;
+
+    // Try parsing as milliseconds
+    final ms = int.tryParse(value);
+    if (ms != null) return Duration(milliseconds: ms);
+  }
+
+  return null;
+}
+
+/// Parses ISO 8601 duration format (e.g., "PT1H30M", "P1D", "P1DT2H30M15S")
+Duration? _parseIso8601Duration(String value) {
+  final regex = RegExp(
+    r'^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$',
+    caseSensitive: false,
+  );
+  final match = regex.firstMatch(value.toUpperCase());
+  if (match == null) return null;
+
+  final days = int.tryParse(match.group(1) ?? '') ?? 0;
+  final hours = int.tryParse(match.group(2) ?? '') ?? 0;
+  final minutes = int.tryParse(match.group(3) ?? '') ?? 0;
+  final secondsStr = match.group(4);
+  final seconds = secondsStr != null ? double.tryParse(secondsStr) ?? 0 : 0;
+
+  return Duration(
+    days: days,
+    hours: hours,
+    minutes: minutes,
+    seconds: seconds.floor(),
+    milliseconds: ((seconds - seconds.floor()) * 1000).round(),
+  );
+}
+
+/// Parses human-readable duration format (e.g., "1h 30m", "2d 5h", "90s")
+Duration? _parseHumanDuration(String value) {
+  // Match ms first (before m and s), then other units
+  final regex = RegExp(r'(\d+)\s*(ms|d|h|m|s)', caseSensitive: false);
+  final matches = regex.allMatches(value.toLowerCase());
+  if (matches.isEmpty) return null;
+
+  int days = 0, hours = 0, minutes = 0, seconds = 0, milliseconds = 0;
+
+  for (final match in matches) {
+    final num = int.tryParse(match.group(1) ?? '') ?? 0;
+    final unit = match.group(2)?.toLowerCase();
+    switch (unit) {
+      case 'd':
+        days += num;
+        break;
+      case 'h':
+        hours += num;
+        break;
+      case 'm':
+        minutes += num;
+        break;
+      case 's':
+        seconds += num;
+        break;
+      case 'ms':
+        milliseconds += num;
+        break;
+    }
+  }
+
+  if (days == 0 &&
+      hours == 0 &&
+      minutes == 0 &&
+      seconds == 0 &&
+      milliseconds == 0) {
+    return null;
+  }
+
+  return Duration(
+    days: days,
+    hours: hours,
+    minutes: minutes,
+    seconds: seconds,
+    milliseconds: milliseconds,
+  );
+}
+
+/// Parses a [dynamic] value into a non-nullable [Duration].
+/// Returns [Duration.zero] if parsing fails.
+Duration flexibleRequiredDurationFromJson(dynamic value) {
+  return flexibleDurationFromJson(value) ?? Duration.zero;
+}
+
+// ============================================================================
+// PHONE NUMBER PARSING
+// ============================================================================
+
+/// Parses a [dynamic] value into a normalized phone number string.
+/// Strips all non-digit characters except leading +.
+/// Returns `null` for empty or invalid input.
+///
+/// Example:
+/// ```dart
+/// @JsonKey(fromJson: flexiblePhoneFromJson)
+/// String? phone; // Input "(555) 123-4567" -> "+15551234567" or "5551234567"
+/// ```
+String? flexiblePhoneFromJson(dynamic value) {
+  if (value == null) return null;
+  final str = value.toString().trim();
+  if (str.isEmpty) return null;
+
+  // Preserve leading + if present
+  final hasPlus = str.startsWith('+');
+
+  // Remove all non-digit characters
+  final digits = str.replaceAll(RegExp(r'[^\d]'), '');
+
+  if (digits.isEmpty) return null;
+
+  return hasPlus ? '+$digits' : digits;
+}
+
+// ============================================================================
+// SLUG PARSING
+// ============================================================================
+
+/// Converts a [dynamic] value into a URL-safe slug.
+/// Converts to lowercase, replaces spaces and special chars with hyphens,
+/// removes consecutive hyphens, and trims leading/trailing hyphens.
+///
+/// Example:
+/// ```dart
+/// @JsonKey(fromJson: flexibleSlugFromJson)
+/// String? slug; // Input "Hello World! 123" -> "hello-world-123"
+/// ```
+String? flexibleSlugFromJson(dynamic value) {
+  if (value == null) return null;
+  final str = value.toString().trim();
+  if (str.isEmpty) return null;
+
+  return str
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^\w\s-]'), '') // Remove special chars except hyphen
+      .replaceAll(
+          RegExp(r'[\s_]+'), '-') // Replace spaces/underscores with hyphen
+      .replaceAll(RegExp(r'-+'), '-') // Remove consecutive hyphens
+      .replaceAll(RegExp(r'^-+|-+$'), ''); // Trim leading/trailing hyphens
+}
+
+// ============================================================================
+// CURRENCY PARSING
+// ============================================================================
+
+/// Represents a parsed currency value with amount and optional currency code.
+class CurrencyValue {
+  final double amount;
+  final String? currencyCode;
+
+  const CurrencyValue(this.amount, [this.currencyCode]);
+
+  @override
+  String toString() => currencyCode != null
+      ? '$currencyCode ${amount.toStringAsFixed(2)}'
+      : amount.toStringAsFixed(2);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CurrencyValue &&
+          amount == other.amount &&
+          currencyCode == other.currencyCode;
+
+  @override
+  int get hashCode => amount.hashCode ^ currencyCode.hashCode;
+}
+
+/// Parses a [dynamic] value into a [CurrencyValue]?.
+/// Handles formats like "$1,234.56", "1234.56 USD", "€100", "100.00".
+///
+/// Example:
+/// ```dart
+/// @JsonKey(fromJson: flexibleCurrencyFromJson)
+/// CurrencyValue? price; // Input "$1,234.56" -> CurrencyValue(1234.56, "USD")
+/// ```
+CurrencyValue? flexibleCurrencyFromJson(dynamic value) {
+  if (value == null) return null;
+
+  if (value is num) {
+    return CurrencyValue(value.toDouble());
+  }
+
+  if (value is Map) {
+    final amount = flexibleDoubleFromJson(value['amount']) ??
+        flexibleDoubleFromJson(value['value']);
+    if (amount == null) return null;
+    final currency = flexibleStringFromJson(value['currency']) ??
+        flexibleStringFromJson(value['currencyCode']);
+    return CurrencyValue(amount, currency);
+  }
+
+  final str = value.toString().trim();
+  if (str.isEmpty) return null;
+
+  // Common currency symbols to codes
+  const symbolToCode = {
+    '\$': 'USD',
+    '€': 'EUR',
+    '£': 'GBP',
+    '¥': 'JPY',
+    '₹': 'INR',
+    '₽': 'RUB',
+    '₿': 'BTC',
+  };
+
+  String? currencyCode;
+  String amountStr = str;
+
+  // Check for currency symbol at start
+  for (final entry in symbolToCode.entries) {
+    if (str.startsWith(entry.key)) {
+      currencyCode = entry.value;
+      amountStr = str.substring(entry.key.length).trim();
+      break;
+    }
+  }
+
+  // Check for currency code at end (e.g., "100.00 USD")
+  final codeMatch = RegExp(r'\s+([A-Z]{3})$').firstMatch(amountStr);
+  if (codeMatch != null) {
+    currencyCode = codeMatch.group(1);
+    amountStr = amountStr.substring(0, codeMatch.start).trim();
+  }
+
+  // Remove thousands separators and parse
+  amountStr = amountStr.replaceAll(',', '').replaceAll(' ', '');
+  final amount = double.tryParse(amountStr);
+
+  if (amount == null) return null;
+  return CurrencyValue(amount, currencyCode);
 }

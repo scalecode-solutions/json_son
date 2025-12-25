@@ -1,3 +1,48 @@
+## 0.5.0
+
+### New Type Parsers
+- Added `flexibleEnumFromJson<T>` for parsing strings/ints to enum values with fallback support
+- Added `flexibleBigIntFromJson` for handling large integers that overflow int64
+- Added `flexibleDurationFromJson` supporting:
+  - ISO 8601 format (e.g., "PT1H30M", "P1D")
+  - Human-readable format (e.g., "1h 30m", "2d 5h", "90s", "500ms")
+  - Map with duration components (e.g., `{"hours": 2, "minutes": 30}`)
+  - Integer milliseconds
+
+### String Utilities
+- Added `flexiblePhoneFromJson` for normalizing phone numbers
+- Added `flexibleSlugFromJson` for converting strings to URL-safe slugs
+- Added `flexibleCurrencyFromJson` with `CurrencyValue` class for parsing currency formats
+
+## 0.4.5
+
+### JsonSon Class Enhancements
+- Added new type getters: `getDuration`, `getBigInt`, `getCurrency`, `getEnum`, `getPhone`, `getSlug`
+- Added path-based list access: `getListPath<T>`, `getListPathOrEmpty<T>`
+- Added path-based getters: `getDurationPath`, `getBigIntPath`
+
+## 0.4.4
+
+### Advanced Object Operations
+- Added `deepMerge` for recursively merging nested objects
+- Added `diff` for comparing two JsonSon objects (returns added, removed, changed)
+- Added `pick` for selecting values at nested paths (like select but with dot notation)
+- Added `flatten` and `unflatten` for converting between nested and dot-notation formats
+
+## 0.4.3
+
+### Conditional Getters & Utilities
+- Added conditional getters: `getIf<T>`, `getIntIf`, `getStringIf`
+- Added `toQueryString` for converting JsonSon to URL query parameters
+
+### Validator Enhancements
+- Added format validators: `phone`, `uuid`, `creditCard`
+- Added date validators: `dateRange`, `pastDate`, `futureDate`
+- Added conditional validators: `when`, `requiredWhen`, `requiredWith`, `requiredWithout`
+- Added array validators: `unique`, `minItems`, `maxItems`
+- Added comparison validators: `between`, `equals`, `different`
+- Added string validators: `contains`, `startsWith`, `endsWith`
+
 ## 0.4.2
 
 - Added `copyWith` methods to helper classes:
@@ -222,3 +267,4 @@
 
 - Initial version.
 
+MV❤️
