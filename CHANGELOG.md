@@ -1,3 +1,53 @@
+## 0.4.2
+
+- Added `copyWith` methods to helper classes:
+  - `PaginationInfo.copyWith`
+  - `ApiError.copyWith`
+  - `UserInfo.copyWith`
+  - `TimestampInfo.copyWith`
+- Enables immutable updates for all data classes
+
+## 0.4.1
+
+- Added `==` and `hashCode` operators to data classes:
+  - `JsonSon`
+  - `PaginationInfo`
+  - `ApiError`
+  - `UserInfo`
+  - `TimestampInfo`
+- Improves testability and enables use in collections like `Set` and `Map` keys
+
+## 0.4.0
+
+### Breaking Changes
+- **BREAKING**: Changed `flexibleListFromJson` return type from `List<T?>?` to `List<T>?`
+  - The function already filtered out null values, so the return type now accurately reflects this
+  - **Migration**: Update type annotations from `List<T?>?` to `List<T>?`
+- Updated `JsonSon.getList` method to match the new signature
+- Simplified `JsonSon.getObjectList` implementation
+
+## 0.3.10
+
+- Added missing `OrDefault` methods to `JsonSon` class:
+  - `getDateTimeOrDefault(String key, DateTime defaultValue)`
+  - `getUriOrDefault(String key, Uri defaultValue)`
+  - `getDateTimePathOrDefault(String path, DateTime defaultValue)`
+  - `getUriPathOrDefault(String path, Uri defaultValue)`
+- Completes the `OrDefault` method set for all supported types
+
+## 0.3.9
+
+- Enhanced `flexibleDateTimeFromJson` with automatic seconds vs milliseconds detection:
+  - Values < 10 billion are treated as seconds since epoch (Unix timestamp)
+  - Values >= 10 billion are treated as milliseconds since epoch
+  - Improves compatibility with APIs that use Unix timestamps in seconds
+
+## 0.3.8
+
+- Internal refactor: removed duplicate function implementations from `json_son.dart`
+- Functions are now only defined in `json_son_base.dart` and properly re-exported
+- No functional changes
+
 ## 0.3.7
 
 - Added comprehensive tests for all new features

@@ -107,6 +107,14 @@ class JsonSon {
   num getNumOrDefault(String key, num defaultValue) =>
       getNum(key) ?? defaultValue;
 
+  /// Gets a [DateTime] value for the given [key], or returns [defaultValue] if null.
+  DateTime getDateTimeOrDefault(String key, DateTime defaultValue) =>
+      getDateTime(key) ?? defaultValue;
+
+  /// Gets a [Uri] value for the given [key], or returns [defaultValue] if null.
+  Uri getUriOrDefault(String key, Uri defaultValue) =>
+      getUri(key) ?? defaultValue;
+
   // String normalization
   /// Gets a trimmed [String] value for the given [key], handling type conversion.
   String? getTrimmedString(String key) =>
@@ -130,7 +138,7 @@ class JsonSon {
 
   // Lists
   /// Gets a [List] of values for the given [key], applying the [converter] to each item.
-  List<T?>? getList<T>(String key, T? Function(dynamic) converter) =>
+  List<T>? getList<T>(String key, T? Function(dynamic) converter) =>
       flexibleListFromJson<T>(_data[key], converter);
 
   /// Gets a non-null [List] of values for the given [key], applying the [converter] to each item.
@@ -143,16 +151,12 @@ class JsonSon {
 
   /// Gets a [List] of [JsonSon] objects for the given [key].
   List<JsonSon>? getObjectList(String key) {
-    final list = getList<JsonSon>(key, (item) {
+    return getList<JsonSon>(key, (item) {
       if (item is Map<String, dynamic>) {
         return JsonSon(item);
       }
       return null;
     });
-
-    // Convert List<JsonSon?>? to List<JsonSon>?
-    if (list == null) return null;
-    return list.whereType<JsonSon>().toList();
   }
 
   // Path-based access (dot notation)
@@ -286,6 +290,14 @@ class JsonSon {
   /// Gets a [num] value at the given [path], or returns [defaultValue] if null.
   num getNumPathOrDefault(String path, num defaultValue) =>
       getNumPath(path) ?? defaultValue;
+
+  /// Gets a [DateTime] value at the given [path], or returns [defaultValue] if null.
+  DateTime getDateTimePathOrDefault(String path, DateTime defaultValue) =>
+      getDateTimePath(path) ?? defaultValue;
+
+  /// Gets a [Uri] value at the given [path], or returns [defaultValue] if null.
+  Uri getUriPathOrDefault(String path, Uri defaultValue) =>
+      getUriPath(path) ?? defaultValue;
 
   // Map operations
   /// Transforms the underlying map using the [mapper] function.
@@ -455,4 +467,22 @@ class JsonSon {
 
   @override
   String toString() => 'JsonSon($_data)';
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is JsonSon &&
+          runtimeType == other.runtimeType &&
+          _mapEquals(_data, other._data);
+
+  @override
+  int get hashCode => _data.hashCode;
+
+  static bool _mapEquals(Map<String, dynamic> a, Map<String, dynamic> b) {
+    if (a.length != b.length) return false;
+    for (final key in a.keys) {
+      if (!b.containsKey(key) || a[key] != b[key]) return false;
+    }
+    return true;
+  }
 }
