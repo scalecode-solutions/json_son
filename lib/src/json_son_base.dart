@@ -100,17 +100,18 @@ num? flexibleNumFromJson(dynamic value) {
 
 /// Parses a [dynamic] value into a [DateTime]?.
 /// Handles `null`.
-/// If the value is an `int`, assumes it's milliseconds since epoch (UTC).
+/// If the value is an `int`:
+///   - Values less than 10000000000 are treated as seconds since epoch (Unix timestamp).
+///   - Values >= 10000000000 are treated as milliseconds since epoch.
 /// If the value is a `String`:
 ///   - Tries direct parsing via `DateTime.tryParse` (for ISO 8601 and similar).
 ///   - If direct parsing fails and the string is purely numeric,
-///     treats it as milliseconds since epoch.
+///     applies the same seconds/milliseconds heuristic as integers.
 /// An empty string or unparseable string format will result in `null`.
 DateTime? flexibleDateTimeFromJson(dynamic value) {
   if (value == null) return null;
   if (value is int) {
-    // Assume milliseconds since epoch if it's an integer
-    return DateTime.fromMillisecondsSinceEpoch(value, isUtc: true);
+    return _parseEpochTimestamp(value);
   }
   if (value is String) {
     if (value.isEmpty) return null;
@@ -118,13 +119,25 @@ DateTime? flexibleDateTimeFromJson(dynamic value) {
     DateTime? dt = DateTime.tryParse(value);
     if (dt != null) return dt;
 
-    // If it's a purely numeric string, try parsing as milliseconds since epoch
+    // If it's a purely numeric string, try parsing as epoch timestamp
     final intValue = int.tryParse(value);
     if (intValue != null) {
-      return DateTime.fromMillisecondsSinceEpoch(intValue, isUtc: true);
+      return _parseEpochTimestamp(intValue);
     }
   }
   return null;
+}
+
+/// Helper to parse epoch timestamps, detecting seconds vs milliseconds.
+/// Timestamps before Sept 2001 in milliseconds (10000000000) are treated as seconds.
+DateTime _parseEpochTimestamp(int value) {
+  // Heuristic: if value is less than 10 billion, it's likely seconds
+  // 10000000000 ms = Sept 9, 2001, which is a reasonable cutoff
+  // Most modern timestamps in seconds are ~1.7 billion (2024)
+  if (value < 10000000000) {
+    return DateTime.fromMillisecondsSinceEpoch(value * 1000, isUtc: true);
+  }
+  return DateTime.fromMillisecondsSinceEpoch(value, isUtc: true);
 }
 
 /// Parses a [dynamic] value (expected to be a String) into a [Uri]?.
