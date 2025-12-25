@@ -181,6 +181,23 @@ class PaginationInfo {
       limit.hashCode ^
       hasMore.hashCode ^
       nextPage.hashCode;
+
+  /// Creates a copy of this PaginationInfo with the given fields replaced
+  PaginationInfo copyWith({
+    int? total,
+    int? page,
+    int? limit,
+    bool? hasMore,
+    int? nextPage,
+  }) {
+    return PaginationInfo(
+      total: total ?? this.total,
+      page: page ?? this.page,
+      limit: limit ?? this.limit,
+      hasMore: hasMore ?? this.hasMore,
+      nextPage: nextPage ?? this.nextPage,
+    );
+  }
 }
 
 /// Helper class for API error information
@@ -231,6 +248,21 @@ class ApiError {
       if (a[i] != b[i]) return false;
     }
     return true;
+  }
+
+  /// Creates a copy of this ApiError with the given fields replaced
+  ApiError copyWith({
+    String? message,
+    String? code,
+    String? details,
+    List<String>? errors,
+  }) {
+    return ApiError(
+      message: message ?? this.message,
+      code: code ?? this.code,
+      details: details ?? this.details,
+      errors: errors ?? this.errors,
+    );
   }
 }
 
@@ -283,6 +315,25 @@ class UserInfo {
       firstName.hashCode ^
       lastName.hashCode ^
       avatar.hashCode;
+
+  /// Creates a copy of this UserInfo with the given fields replaced
+  UserInfo copyWith({
+    int? id,
+    String? name,
+    String? email,
+    String? firstName,
+    String? lastName,
+    String? avatar,
+  }) {
+    return UserInfo(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      avatar: avatar ?? this.avatar,
+    );
+  }
 }
 
 /// Helper class for timestamp information
@@ -328,4 +379,17 @@ class TimestampInfo {
   @override
   int get hashCode =>
       createdAt.hashCode ^ updatedAt.hashCode ^ deletedAt.hashCode;
+
+  /// Creates a copy of this TimestampInfo with the given fields replaced
+  TimestampInfo copyWith({
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? deletedAt,
+  }) {
+    return TimestampInfo(
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+    );
+  }
 }
