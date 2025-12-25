@@ -107,6 +107,14 @@ class JsonSon {
   num getNumOrDefault(String key, num defaultValue) =>
       getNum(key) ?? defaultValue;
 
+  /// Gets a [DateTime] value for the given [key], or returns [defaultValue] if null.
+  DateTime getDateTimeOrDefault(String key, DateTime defaultValue) =>
+      getDateTime(key) ?? defaultValue;
+
+  /// Gets a [Uri] value for the given [key], or returns [defaultValue] if null.
+  Uri getUriOrDefault(String key, Uri defaultValue) =>
+      getUri(key) ?? defaultValue;
+
   // String normalization
   /// Gets a trimmed [String] value for the given [key], handling type conversion.
   String? getTrimmedString(String key) =>
@@ -286,6 +294,14 @@ class JsonSon {
   /// Gets a [num] value at the given [path], or returns [defaultValue] if null.
   num getNumPathOrDefault(String path, num defaultValue) =>
       getNumPath(path) ?? defaultValue;
+
+  /// Gets a [DateTime] value at the given [path], or returns [defaultValue] if null.
+  DateTime getDateTimePathOrDefault(String path, DateTime defaultValue) =>
+      getDateTimePath(path) ?? defaultValue;
+
+  /// Gets a [Uri] value at the given [path], or returns [defaultValue] if null.
+  Uri getUriPathOrDefault(String path, Uri defaultValue) =>
+      getUriPath(path) ?? defaultValue;
 
   // Map operations
   /// Transforms the underlying map using the [mapper] function.
