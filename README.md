@@ -24,12 +24,13 @@ This package offers two approaches:
 ## Features
 
 ### Core Features
-- Convert dynamic JSON values to `int?`, `double?`, `num?`, `bool?`, `String?`, `DateTime?`, `Uri?`, `List<T?>?`, or `List<T>`.
+- Convert dynamic JSON values to `int?`, `double?`, `num?`, `bool?`, `String?`, `DateTime?`, `Uri?`, `List<T>?`, or `List<T>`.
 - Parse comma-separated strings into `List<String>?`.
 - Normalize strings (trimming, case conversion).
 - Gracefully handles `null`s, empty strings, and parsing failures by returning `null` (or an empty list for non-null list helpers).
 - Supports common alternative representations (e.g., "true" or 1 for boolean `true`, numeric strings for numbers, ISO 8601 or timestamps for `DateTime`).
 - Handles APIs that may return a single item where a list is expected.
+- **NEW in 0.5.0**: Parse enums, BigInt, Duration, phone numbers, slugs, and currency values.
 
 ### Enhanced JsonSon Class
 - **Error Tracking**: Detailed error tracking with path information for debugging and validation.
@@ -41,6 +42,7 @@ This package offers two approaches:
 - **Fallback Keys**: Try multiple keys in sequence until a value is found
 - **Transformation Methods**: Transform JSON data with mapping functions
 - **Validation**: Check for required keys and paths with detailed error messages
+- **NEW in 0.5.0**: Deep merge, diff, pick, flatten/unflatten, conditional getters, query string conversion
 
 ### Extensions
 - **Map Extensions**: Direct access to JsonSon methods from Map objects
@@ -57,6 +59,7 @@ This package offers two approaches:
 - **Range Validation**: Validate numeric ranges and string lengths
 - **Custom Validation**: Create custom validation rules
 - **Nested Validation**: Validate nested objects and array items
+- **NEW in 0.5.0**: Phone, UUID, credit card, date range, conditional validation, array uniqueness
 
 ## Getting Started
 
@@ -66,7 +69,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  json_son: ^0.3.7 # Or the latest version
+  json_son: ^0.5.0 # Or the latest version
 ```
 
 Then, run `flutter pub get` or `dart pub get`.
@@ -247,6 +250,152 @@ final user = userJson.getUserInfo();
 print('Full name: ${user.fullName}'); // 'Jane Doe'
 ```
 
+#### New Type Parsers (v0.5.0)
+
+Parse enums, durations, BigInt, and more:
+
+```dart
+import 'package:json_son/json_son.dart';
+
+enum Status { pending, active, completed }
+
+// Enum parsing (case-insensitive string or index)
+final status = flexibleEnumFromJson('active', Status.values); // Status.active
+final statusByIndex = flexibleEnumFromJson(1, Status.values); // Status.active
+final statusWithFallback = flexibleEnumFromJson('invalid', Status.values, fallback: Status.pending);
+
+// BigInt for large numbers
+final bigNum = flexibleBigIntFromJson('12345678901234567890');
+
+// Duration parsing (ISO 8601, human-readable, or map)
+final duration1 = flexibleDurationFromJson('PT1H30M'); // 1 hour 30 minutes
+final duration2 = flexibleDurationFromJson('2h 30m'); // 2 hours 30 minutes
+final duration3 = flexibleDurationFromJson({'hours': 2, 'minutes': 30});
+final duration4 = flexibleDurationFromJson(5000); // 5000 milliseconds
+
+// Phone number normalization
+final phone = flexiblePhoneFromJson('(555) 123-4567'); // '5551234567'
+final intlPhone = flexiblePhoneFromJson('+1 555 123 4567'); // '+15551234567'
+
+// URL-safe slug generation
+final slug = flexibleSlugFromJson('Hello World! 123'); // 'hello-world-123'
+
+// Currency parsing
+final price = flexibleCurrencyFromJson('\$1,234.56'); // CurrencyValue(1234.56, 'USD')
+final euroPrice = flexibleCurrencyFromJson('€100'); // CurrencyValue(100.0, 'EUR')
+final priceFromMap = flexibleCurrencyFromJson({'amount': 50.0, 'currency': 'GBP'});
+```
+
+#### Advanced JsonSon Operations (v0.5.0)
+
+Use the new advanced operations for complex data manipulation:
+
+```dart
+import 'package:json_son/json_son.dart';
+
+final json = JsonSon({
+  'user': {
+    'name': 'John',
+    'settings': {'theme': 'dark', 'notifications': true}
+  },
+  'scores': [85, 92, 78]
+});
+
+// New type getters
+final duration = json.getDuration('timeout');
+final bigId = json.getBigInt('largeId');
+final price = json.getCurrency('price');
+final status = json.getEnum('status', Status.values);
+final phone = json.getPhone('phone');
+final slug = json.getSlug('title');
+
+// Path-based list access
+final scores = json.getListPath<int>('data.scores', flexibleIntFromJson);
+
+// Deep merge (recursively merges nested objects)
+final base = JsonSon({'a': 1, 'nested': {'b': 2, 'c': 3}});
+final override = JsonSon({'nested': {'c': 30, 'd': 4}});
+final merged = base.deepMerge(override);
+// Result: {'a': 1, 'nested': {'b': 2, 'c': 30, 'd': 4}}
+
+// Diff (compare two JsonSon objects)
+final original = JsonSon({'a': 1, 'b': 2});
+final modified = JsonSon({'a': 1, 'b': 20, 'c': 3});
+final diff = original.diff(modified);
+// diff['added'] = {'c': 3}
+// diff['changed'] = {'b': {'from': 2, 'to': 20}}
+
+// Pick (select nested paths)
+final picked = json.pick(['user.name', 'user.settings.theme']);
+// Result: {'user': {'name': 'John', 'settings': {'theme': 'dark'}}}
+
+// Flatten/Unflatten
+final flat = json.flatten(); // {'user.name': 'John', 'user.settings.theme': 'dark', ...}
+final nested = JsonSon.unflatten({'a.b.c': 1}); // {'a': {'b': {'c': 1}}}
+
+// Conditional getters
+final age = json.getIntIf('age', (v) => v >= 18); // Only returns if >= 18
+final name = json.getStringIf('name', (v) => v.length >= 3);
+
+// Convert to query string
+final queryJson = JsonSon({'page': 1, 'search': 'hello world'});
+final queryString = queryJson.toQueryString(); // 'page=1&search=hello%20world'
+```
+
+#### Enhanced Validation (v0.5.0)
+
+New validation methods for common patterns:
+
+```dart
+import 'package:json_son/json_son.dart';
+
+final json = JsonSon({
+  'phone': '555-123-4567',
+  'uuid': '550e8400-e29b-41d4-a716-446655440000',
+  'card': '4532015112830366',
+  'birthDate': '1990-05-15',
+  'type': 'business',
+  'company': 'Acme Inc',
+  'tags': ['a', 'b', 'c'],
+  'password': 'secret123',
+  'confirmPassword': 'secret123',
+  'url': 'https://example.com/page'
+});
+
+final validator = JsonSonValidator(json)
+  // Format validators
+  ..phone('phone')
+  ..uuid('uuid')
+  ..creditCard('card')
+  
+  // Date validators
+  ..dateRange('birthDate', min: DateTime(1900), max: DateTime.now())
+  ..pastDate('birthDate')
+  
+  // Conditional validation
+  ..requiredWhen('company', 'type', 'business') // company required when type is 'business'
+  ..requiredWith('confirmPassword', 'password') // confirmPassword required when password exists
+  
+  // Array validators
+  ..unique('tags') // All items must be unique
+  ..minItems('tags', 1)
+  ..maxItems('tags', 10)
+  
+  // Comparison validators
+  ..between('age', 0, 120)
+  ..equals('confirmPassword', 'password') // Must match password field
+  ..different('newPassword', 'oldPassword')
+  
+  // String validators
+  ..contains('email', '@')
+  ..startsWith('url', 'https://')
+  ..endsWith('file', '.pdf');
+
+if (!validator.isValid) {
+  print('Errors: ${validator.errors}');
+}
+```
+
 #### Validation Framework
 
 Use the fluent validation API for complex validations:
@@ -416,12 +565,53 @@ class JsonSonValidator {
   // Nested validation
   JsonSonValidator nested(String key, void Function(JsonSonValidator) validator);
   JsonSonValidator eachItem(String key, void Function(JsonSonValidator, int) itemValidator);
+  
+  // New in v0.5.0
+  
+  // Format validators
+  JsonSonValidator phone(String key, {String? message, int? minDigits, int? maxDigits});
+  JsonSonValidator uuid(String key, {String? message});
+  JsonSonValidator creditCard(String key, {String? message});
+  
+  // Date validators
+  JsonSonValidator dateRange(String key, {DateTime? min, DateTime? max, String? message});
+  JsonSonValidator pastDate(String key, {String? message});
+  JsonSonValidator futureDate(String key, {String? message});
+  
+  // Conditional validators
+  JsonSonValidator when(String conditionKey, bool Function(dynamic) condition, void Function(JsonSonValidator) validatorFn);
+  JsonSonValidator requiredWhen(String key, String conditionKey, dynamic conditionValue, {String? message});
+  JsonSonValidator requiredWith(String key, String otherKey, {String? message});
+  JsonSonValidator requiredWithout(String key, String otherKey, {String? message});
+  
+  // Array validators
+  JsonSonValidator unique(String key, {String? message, dynamic Function(dynamic)? by});
+  JsonSonValidator minItems(String key, int count, {String? message});
+  JsonSonValidator maxItems(String key, int count, {String? message});
+  
+  // Comparison validators
+  JsonSonValidator between(String key, num minValue, num maxValue, {String? message});
+  JsonSonValidator equals(String key, String otherKey, {String? message});
+  JsonSonValidator different(String key, String otherKey, {String? message});
+  
+  // String validators
+  JsonSonValidator contains(String key, String substring, {String? message, bool caseSensitive});
+  JsonSonValidator startsWith(String key, String prefix, {String? message});
+  JsonSonValidator endsWith(String key, String suffix, {String? message});
 }
 ```
 
 ### Helper Classes
 
 ```dart
+// Currency value helper (new in v0.5.0)
+class CurrencyValue {
+  final double amount;
+  final String? currencyCode;
+  
+  String toString() => currencyCode != null ? '$currencyCode ${amount.toStringAsFixed(2)}' : amount.toStringAsFixed(2);
+}
+
 // Pagination information helper
 class PaginationInfo {
   final int? total;
@@ -562,6 +752,39 @@ class TimestampInfo {
   - The `mapper` function can return `null` to skip entries.
   - Example: Converts `{"a": "1", "b": "x"}` to `{"a": 1}` when used with `int.tryParse`.
 
+#### New in v0.5.0
+
+- `T? flexibleEnumFromJson<T extends Enum>(dynamic value, List<T> values, {T? fallback})`
+  - Parses to an enum value. Handles `String` (case-insensitive name matching) and `int` (index).
+  - Returns `fallback` if parsing fails or value is null.
+
+- `T flexibleRequiredEnumFromJson<T extends Enum>(dynamic value, List<T> values, T fallback)`
+  - Non-nullable version that always returns the fallback if parsing fails.
+
+- `BigInt? flexibleBigIntFromJson(dynamic value)`
+  - Parses to `BigInt?`. Handles `null`, `int`, `String`, and `BigInt`.
+  - Useful for large integers that overflow int64.
+
+- `Duration? flexibleDurationFromJson(dynamic value)`
+  - Parses to `Duration?`. Handles:
+    - `int` as milliseconds
+    - ISO 8601 format (e.g., "PT1H30M", "P1D")
+    - Human-readable format (e.g., "1h 30m", "2d 5h", "90s", "500ms")
+    - `Map` with keys like "hours", "minutes", "seconds"
+
+- `String? flexiblePhoneFromJson(dynamic value)`
+  - Normalizes phone numbers by stripping non-digit characters (preserves leading +).
+  - Example: "(555) 123-4567" → "5551234567"
+
+- `String? flexibleSlugFromJson(dynamic value)`
+  - Converts strings to URL-safe slugs.
+  - Example: "Hello World! 123" → "hello-world-123"
+
+- `CurrencyValue? flexibleCurrencyFromJson(dynamic value)`
+  - Parses currency values from various formats.
+  - Handles: "$1,234.56", "100.00 USD", "€100", `Map` with amount/currency.
+  - Returns `CurrencyValue` with `amount` and optional `currencyCode`.
+
 ### Class-Based API
 
 The `JsonSon` class provides a more fluent interface for working with JSON data:
@@ -618,6 +841,31 @@ The `JsonSon` class provides a more fluent interface for working with JSON data:
 - `getNumPath(String path)` - Gets a num using dot notation
 - `getUriPath(String path)` - Gets a Uri using dot notation
 - `getObjectPath(String path)` - Gets a nested JsonSon object using dot notation
+- `getDurationPath(String path)` - Gets a Duration using dot notation
+- `getBigIntPath(String path)` - Gets a BigInt using dot notation
+- `getListPath<T>(String path, T? Function(dynamic) converter)` - Gets a List at a path
+- `getListPathOrEmpty<T>(String path, T? Function(dynamic) converter)` - Gets a non-null List at a path
+
+#### New Type Getters (v0.5.0)
+
+- `getDuration(String key)` - Gets a Duration value
+- `getBigInt(String key)` - Gets a BigInt value
+- `getCurrency(String key)` - Gets a CurrencyValue
+- `getEnum<T>(String key, List<T> values, {T? fallback})` - Gets an enum value
+- `getPhone(String key)` - Gets a normalized phone number
+- `getSlug(String key)` - Gets a URL-safe slug
+
+#### Advanced Operations (v0.5.0)
+
+- `deepMerge(JsonSon other)` - Recursively merges nested objects
+- `diff(JsonSon other)` - Compares and returns added/removed/changed keys
+- `pick(List<String> paths)` - Selects values at nested paths
+- `flatten({String separator})` - Converts nested objects to dot-notation keys
+- `unflatten(Map<String, dynamic> flatMap, {String separator})` - Converts dot-notation to nested
+- `getIf<T>(String key, T? Function(String) getter, bool Function(dynamic) condition)` - Conditional getter
+- `getIntIf(String key, bool Function(int) condition)` - Gets int only if condition met
+- `getStringIf(String key, bool Function(String) condition)` - Gets string only if condition met
+- `toQueryString({bool encode})` - Converts to URL query string
 
 #### Utility Methods
 
@@ -639,3 +887,6 @@ Feel free to open an issue or submit a pull request if you have suggestions or f
 - **License**: This package is licensed under the MIT License. See the `LICENSE` file for more details.
 - **Contributions**: We welcome contributions! Please feel free to submit a pull request or open an issue. We generally respond to issues and pull requests within a few business days, but response times may vary.
 - **Further Information**: For more detailed information on specific functions and their behavior, please refer to the inline documentation within the source code.
+
+
+MV❤️
