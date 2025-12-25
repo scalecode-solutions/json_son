@@ -467,4 +467,22 @@ class JsonSon {
 
   @override
   String toString() => 'JsonSon($_data)';
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is JsonSon &&
+          runtimeType == other.runtimeType &&
+          _mapEquals(_data, other._data);
+
+  @override
+  int get hashCode => _data.hashCode;
+
+  static bool _mapEquals(Map<String, dynamic> a, Map<String, dynamic> b) {
+    if (a.length != b.length) return false;
+    for (final key in a.keys) {
+      if (!b.containsKey(key) || a[key] != b[key]) return false;
+    }
+    return true;
+  }
 }

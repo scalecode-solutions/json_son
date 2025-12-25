@@ -162,6 +162,25 @@ class PaginationInfo {
   @override
   String toString() =>
       'PaginationInfo(total: $total, page: $page, limit: $limit, hasMore: $hasMore, nextPage: $nextPage)';
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PaginationInfo &&
+          runtimeType == other.runtimeType &&
+          total == other.total &&
+          page == other.page &&
+          limit == other.limit &&
+          hasMore == other.hasMore &&
+          nextPage == other.nextPage;
+
+  @override
+  int get hashCode =>
+      total.hashCode ^
+      page.hashCode ^
+      limit.hashCode ^
+      hasMore.hashCode ^
+      nextPage.hashCode;
 }
 
 /// Helper class for API error information
@@ -190,6 +209,29 @@ class ApiError {
 
   @override
   String toString() => 'ApiError(code: $code, message: $message)';
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ApiError &&
+          runtimeType == other.runtimeType &&
+          message == other.message &&
+          code == other.code &&
+          details == other.details &&
+          _listEquals(errors, other.errors);
+
+  @override
+  int get hashCode =>
+      message.hashCode ^ code.hashCode ^ details.hashCode ^ errors.hashCode;
+
+  static bool _listEquals<T>(List<T>? a, List<T>? b) {
+    if (a == null) return b == null;
+    if (b == null || a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 }
 
 /// Helper class for user information
@@ -220,6 +262,27 @@ class UserInfo {
 
   @override
   String toString() => 'UserInfo(id: $id, name: $name, email: $email)';
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserInfo &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          email == other.email &&
+          firstName == other.firstName &&
+          lastName == other.lastName &&
+          avatar == other.avatar;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      name.hashCode ^
+      email.hashCode ^
+      firstName.hashCode ^
+      lastName.hashCode ^
+      avatar.hashCode;
 }
 
 /// Helper class for timestamp information
@@ -252,4 +315,17 @@ class TimestampInfo {
   @override
   String toString() =>
       'TimestampInfo(createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt)';
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TimestampInfo &&
+          runtimeType == other.runtimeType &&
+          createdAt == other.createdAt &&
+          updatedAt == other.updatedAt &&
+          deletedAt == other.deletedAt;
+
+  @override
+  int get hashCode =>
+      createdAt.hashCode ^ updatedAt.hashCode ^ deletedAt.hashCode;
 }
